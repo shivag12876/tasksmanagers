@@ -1,30 +1,19 @@
-import express from "express";
-import dotenv from "dotenv";
-dotenv.config(); // ✅ सबसे ऊपर ले आया
-
-import todoRoutes from "./routes/todo.route.js";
-import { connectDB } from "./config/db.js";
-import cors from "cors";
-import path from "path";
-const PORT = process.env.PORT || 5000;
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
-app.use(express.json());
-// app.use(cors());
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-app.use("/api/todos", todoRoutes);
+// Static files serve karne ka path
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
-const __dirname = path.resolve();
-
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "/frontend/dist")));
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
-  });
-}
-
-app.listen(PORT, () => {
-  connectDB();
-  console.log("Server started at http://localhost:5000");
+// Agar koi route match nahi hua to index.html bhejna
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
 });
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
